@@ -1,0 +1,66 @@
+{
+  "_rationale": "Neutral prose with no entity and no fact recall; ablating d_know here tests whether it is a generic load-bearing direction (fluency/perplexity hit) vs a knowledge-recall gate.",
+  "readout_instruction": "Continue the sentence naturally.",
+  "items": [
+    {
+      "stem": "The weather this morning was"
+    },
+    {
+      "stem": "She picked up her bag and"
+    },
+    {
+      "stem": "After a long day, he decided to"
+    },
+    {
+      "stem": "The meeting started late because"
+    },
+    {
+      "stem": "I opened the window to let in"
+    },
+    {
+      "stem": "They walked along the path until"
+    },
+    {
+      "stem": "He poured himself a cup of"
+    },
+    {
+      "stem": "The room was quiet except for"
+    },
+    {
+      "stem": "We sat by the fire and"
+    },
+    {
+      "stem": "The train arrived just as"
+    },
+    {
+      "stem": "She smiled and said that"
+    },
+    {
+      "stem": "It was the kind of day that"
+    },
+    {
+      "stem": "He looked out the window and"
+    },
+    {
+      "stem": "The children played in the"
+    },
+    {
+      "stem": "After dinner we usually"
+    },
+    {
+      "stem": "The book on the table was"
+    },
+    {
+      "stem": "I could not decide whether to"
+    },
+    {
+      "stem": "The music played softly while"
+    },
+    {
+      "stem": "They laughed about it for"
+    },
+    {
+      "stem": "Morning light came through the"
+    }
+  ]
+}

@@ -1,0 +1,439 @@
+{
+  "objective": "O4.1+O4.2",
+  "model_id": "google/gemma-3-4b-it",
+  "n_layers": 34,
+  "readout": "assistant_prefill_recall",
+  "instruction": "Answer with the fact, continuing the sentence.",
+  "n_known": 40,
+  "n_unknown": 40,
+  "split": {
+    "n_train_known": 20,
+    "n_val_known": 20,
+    "n_train_unknown": 20,
+    "n_val_unknown": 20
+  },
+  "best_layer_by_val_auc": {
+    "layer": 33,
+    "train_auc": 1.0,
+    "val_auc": 0.9225
+  },
+  "layer_profile": [
+    {
+      "layer": 0,
+      "train_auc": 0.64,
+      "val_auc": 0.675
+    },
+    {
+      "layer": 1,
+      "train_auc": 0.7275,
+      "val_auc": 0.56
+    },
+    {
+      "layer": 2,
+      "train_auc": 0.68,
+      "val_auc": 0.7
+    },
+    {
+      "layer": 3,
+      "train_auc": 0.825,
+      "val_auc": 0.68
+    },
+    {
+      "layer": 4,
+      "train_auc": 0.8225,
+      "val_auc": 0.5025
+    },
+    {
+      "layer": 5,
+      "train_auc": 0.7675,
+      "val_auc": 0.73
+    },
+    {
+      "layer": 6,
+      "train_auc": 0.825,
+      "val_auc": 0.5525
+    },
+    {
+      "layer": 7,
+      "train_auc": 0.6925,
+      "val_auc": 0.78
+    },
+    {
+      "layer": 8,
+      "train_auc": 0.6575,
+      "val_auc": 0.57
+    },
+    {
+      "layer": 9,
+      "train_auc": 0.6725,
+      "val_auc": 0.6875
+    },
+    {
+      "layer": 10,
+      "train_auc": 0.66,
+      "val_auc": 0.6425
+    },
+    {
+      "layer": 11,
+      "train_auc": 0.8525,
+      "val_auc": 0.8475
+    },
+    {
+      "layer": 12,
+      "train_auc": 0.74,
+      "val_auc": 0.805
+    },
+    {
+      "layer": 13,
+      "train_auc": 0.64,
+      "val_auc": 0.785
+    },
+    {
+      "layer": 14,
+      "train_auc": 0.705,
+      "val_auc": 0.7475
+    },
+    {
+      "layer": 15,
+      "train_auc": 0.76,
+      "val_auc": 0.6725
+    },
+    {
+      "layer": 16,
+      "train_auc": 0.71,
+      "val_auc": 0.6425
+    },
+    {
+      "layer": 17,
+      "train_auc": 0.73,
+      "val_auc": 0.61
+    },
+    {
+      "layer": 18,
+      "train_auc": 0.735,
+      "val_auc": 0.6
+    },
+    {
+      "layer": 19,
+      "train_auc": 0.7475,
+      "val_auc": 0.6025
+    },
+    {
+      "layer": 20,
+      "train_auc": 0.77,
+      "val_auc": 0.6075
+    },
+    {
+      "layer": 21,
+      "train_auc": 0.87,
+      "val_auc": 0.62
+    },
+    {
+      "layer": 22,
+      "train_auc": 0.96,
+      "val_auc": 0.64
+    },
+    {
+      "layer": 23,
+      "train_auc": 0.9575,
+      "val_auc": 0.6975
+    },
+    {
+      "layer": 24,
+      "train_auc": 0.9675,
+      "val_auc": 0.7825
+    },
+    {
+      "layer": 25,
+      "train_auc": 0.9725,
+      "val_auc": 0.795
+    },
+    {
+      "layer": 26,
+      "train_auc": 0.9725,
+      "val_auc": 0.8
+    },
+    {
+      "layer": 27,
+      "train_auc": 0.97,
+      "val_auc": 0.8075
+    },
+    {
+      "layer": 28,
+      "train_auc": 0.915,
+      "val_auc": 0.8
+    },
+    {
+      "layer": 29,
+      "train_auc": 0.94,
+      "val_auc": 0.8025
+    },
+    {
+      "layer": 30,
+      "train_auc": 0.97,
+      "val_auc": 0.8375
+    },
+    {
+      "layer": 31,
+      "train_auc": 0.98,
+      "val_auc": 0.8575
+    },
+    {
+      "layer": 32,
+      "train_auc": 0.9875,
+      "val_auc": 0.845
+    },
+    {
+      "layer": 33,
+      "train_auc": 1.0,
+      "val_auc": 0.9225
+    }
+  ],
+  "readout_validity": {
+    "median_gold_rank": 0,
+    "frac_recalled_top1": 0.875,
+    "frac_recalled_top5": 1.0,
+    "per_item": [
+      {
+        "prompt": "The capital of France is",
+        "answer": "Paris",
+        "gold_rank": 0,
+        "top1": " Paris"
+      },
+      {
+        "prompt": "The capital of Japan is",
+        "answer": "Tokyo",
+        "gold_rank": 0,
+        "top1": " Tokyo"
+      },
+      {
+        "prompt": "The capital of Italy is",
+        "answer": "Rome",
+        "gold_rank": 0,
+        "top1": " Rome"
+      },
+      {
+        "prompt": "The capital of Germany is",
+        "answer": "Berlin",
+        "gold_rank": 0,
+        "top1": " Berlin"
+      },
+      {
+        "prompt": "The chemical symbol for gold is",
+        "answer": "Au",
+        "gold_rank": 0,
+        "top1": " Au"
+      },
+      {
+        "prompt": "The chemical symbol for sodium is",
+        "answer": "Na",
+        "gold_rank": 0,
+        "top1": " Na"
+      },
+      {
+        "prompt": "The largest planet in our solar system is",
+        "answer": "Jupiter",
+        "gold_rank": 0,
+        "top1": " Jupiter"
+      },
+      {
+        "prompt": "The tallest mountain on Earth is Mount",
+        "answer": "Everest",
+        "gold_rank": 0,
+        "top1": " Everest"
+      },
+      {
+        "prompt": "The currency of Japan is the",
+        "answer": "yen",
+        "gold_rank": 0,
+        "top1": " yen"
+      },
+      {
+        "prompt": "The author of the play Romeo and Juliet is William",
+        "answer": "Shakespeare",
+        "gold_rank": 0,
+        "top1": " Shakespeare"
+      },
+      {
+        "prompt": "The first person to walk on the Moon was Neil",
+        "answer": "Armstrong",
+        "gold_rank": 0,
+        "top1": " Armstrong"
+      },
+      {
+        "prompt": "The painter of the Mona Lisa was Leonardo da",
+        "answer": "Vinci",
+        "gold_rank": 0,
+        "top1": " Vinci"
+      },
+      {
+        "prompt": "The longest river in the world is the",
+        "answer": "Nile",
+        "gold_rank": 1,
+        "top1": " Amazon"
+      },
+      {
+        "prompt": "The largest ocean on Earth is the",
+        "answer": "Pacific",
+        "gold_rank": 0,
+        "top1": " Pacific"
+      },
+      {
+        "prompt": "The number of continents on Earth is",
+        "answer": "seven",
+        "gold_rank": 1,
+        "top1": " generally"
+      },
+      {
+        "prompt": "The capital of the United Kingdom is",
+        "answer": "London",
+        "gold_rank": 0,
+        "top1": " London"
+      },
+      {
+        "prompt": "The capital of Spain is",
+        "answer": "Madrid",
+        "gold_rank": 0,
+        "top1": " Madrid"
+      },
+      {
+        "prompt": "The capital of Russia is",
+        "answer": "Moscow",
+        "gold_rank": 0,
+        "top1": " Moscow"
+      },
+      {
+        "prompt": "The capital of China is",
+        "answer": "Beijing",
+        "gold_rank": 0,
+        "top1": " Beijing"
+      },
+      {
+        "prompt": "The capital of Egypt is",
+        "answer": "Cairo",
+        "gold_rank": 0,
+        "top1": " Cairo"
+      },
+      {
+        "prompt": "The capital of Canada is",
+        "answer": "Ottawa",
+        "gold_rank": 0,
+        "top1": " Ottawa"
+      },
+      {
+        "prompt": "The capital of Greece is",
+        "answer": "Athens",
+        "gold_rank": 0,
+        "top1": " Athens"
+      },
+      {
+        "prompt": "The capital of Portugal is",
+        "answer": "Lisbon",
+        "gold_rank": 0,
+        "top1": " Lisbon"
+      },
+      {
+        "prompt": "The capital of Austria is",
+        "answer": "Vienna",
+        "gold_rank": 0,
+        "top1": " Vienna"
+      },
+      {
+        "prompt": "The chemical symbol for iron is",
+        "answer": "Fe",
+        "gold_rank": 0,
+        "top1": " Fe"
+      },
+      {
+        "prompt": "The chemical symbol for silver is",
+        "answer": "Ag",
+        "gold_rank": 0,
+        "top1": " Ag"
+      },
+      {
+        "prompt": "The chemical symbol for potassium is",
+        "answer": "K",
+        "gold_rank": 0,
+        "top1": " K"
+      },
+      {
+        "prompt": "The closest planet to the Sun is",
+        "answer": "Mercury",
+        "gold_rank": 0,
+        "top1": " Mercury"
+      },
+      {
+        "prompt": "The planet known for its prominent rings is",
+        "answer": "Saturn",
+        "gold_rank": 0,
+        "top1": " Saturn"
+      },
+      {
+        "prompt": "The red planet is called",
+        "answer": "Mars",
+        "gold_rank": 0,
+        "top1": " Mars"
+      },
+      {
+        "prompt": "Water is composed of hydrogen and",
+        "answer": "oxygen",
+        "gold_rank": 0,
+        "top1": " oxygen"
+      },
+      {
+        "prompt": "The first President of the United States was George",
+        "answer": "Washington",
+        "gold_rank": 0,
+        "top1": " Washington"
+      },
+      {
+        "prompt": "The theory of relativity was developed by Albert",
+        "answer": "Einstein",
+        "gold_rank": 0,
+        "top1": " Einstein"
+      },
+      {
+        "prompt": "The theory of evolution was proposed by Charles",
+        "answer": "Darwin",
+        "gold_rank": 0,
+        "top1": " Darwin"
+      },
+      {
+        "prompt": "The largest country in the world by area is",
+        "answer": "Russia",
+        "gold_rank": 0,
+        "top1": " Russia"
+      },
+      {
+        "prompt": "The largest desert in the world is the",
+        "answer": "Sahara",
+        "gold_rank": 1,
+        "top1": " Antarctic"
+      },
+      {
+        "prompt": "The currency of the United States is the",
+        "answer": "dollar",
+        "gold_rank": 3,
+        "top1": " **"
+      },
+      {
+        "prompt": "The currency of the United Kingdom is the",
+        "answer": "pound",
+        "gold_rank": 1,
+        "top1": " British"
+      },
+      {
+        "prompt": "The opposite of hot is",
+        "answer": "cold",
+        "gold_rank": 0,
+        "top1": " cold"
+      },
+      {
+        "prompt": "The fastest land animal is the",
+        "answer": "cheetah",
+        "gold_rank": 0,
+        "top1": " cheetah"
+      }
+    ]
+  }
+}

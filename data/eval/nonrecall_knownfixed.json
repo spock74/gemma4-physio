@@ -1,0 +1,166 @@
+{
+  "_rationale": "Each item reuses a known entity AND states its gold fact, then ends at a syntactically-open position so the next-token prediction is a generic opinion word, NOT a recalled fact. This fixes the entity's known-ness across conditions while removing the recall demand, isolating recall-gating from generic load-bearing when d_know is ablated.",
+  "readout_instruction": "Continue the sentence naturally.",
+  "items": [
+    {
+      "stem": "The capital of France is Paris. I find that topic",
+      "entity": "Paris"
+    },
+    {
+      "stem": "The capital of Japan is Tokyo. I find that topic",
+      "entity": "Tokyo"
+    },
+    {
+      "stem": "The capital of Italy is Rome. I find that topic",
+      "entity": "Rome"
+    },
+    {
+      "stem": "The capital of Germany is Berlin. I find that topic",
+      "entity": "Berlin"
+    },
+    {
+      "stem": "The chemical symbol for gold is Au. I find that topic",
+      "entity": "Au"
+    },
+    {
+      "stem": "The chemical symbol for sodium is Na. I find that topic",
+      "entity": "Na"
+    },
+    {
+      "stem": "The largest planet in our solar system is Jupiter. I find that topic",
+      "entity": "Jupiter"
+    },
+    {
+      "stem": "The tallest mountain on Earth is Mount Everest. I find that topic",
+      "entity": "Everest"
+    },
+    {
+      "stem": "The currency of Japan is the yen. I find that topic",
+      "entity": "yen"
+    },
+    {
+      "stem": "The author of the play Romeo and Juliet is William Shakespeare. I find that topic",
+      "entity": "Shakespeare"
+    },
+    {
+      "stem": "The first person to walk on the Moon was Neil Armstrong. I find that topic",
+      "entity": "Armstrong"
+    },
+    {
+      "stem": "The painter of the Mona Lisa was Leonardo da Vinci. I find that topic",
+      "entity": "Vinci"
+    },
+    {
+      "stem": "The longest river in the world is the Nile. I find that topic",
+      "entity": "Nile"
+    },
+    {
+      "stem": "The largest ocean on Earth is the Pacific. I find that topic",
+      "entity": "Pacific"
+    },
+    {
+      "stem": "The number of continents on Earth is seven. I find that topic",
+      "entity": "seven"
+    },
+    {
+      "stem": "The capital of the United Kingdom is London. I find that topic",
+      "entity": "London"
+    },
+    {
+      "stem": "The capital of Spain is Madrid. I find that topic",
+      "entity": "Madrid"
+    },
+    {
+      "stem": "The capital of Russia is Moscow. I find that topic",
+      "entity": "Moscow"
+    },
+    {
+      "stem": "The capital of China is Beijing. I find that topic",
+      "entity": "Beijing"
+    },
+    {
+      "stem": "The capital of Egypt is Cairo. I find that topic",
+      "entity": "Cairo"
+    },
+    {
+      "stem": "The capital of Canada is Ottawa. I find that topic",
+      "entity": "Ottawa"
+    },
+    {
+      "stem": "The capital of Greece is Athens. I find that topic",
+      "entity": "Athens"
+    },
+    {
+      "stem": "The capital of Portugal is Lisbon. I find that topic",
+      "entity": "Lisbon"
+    },
+    {
+      "stem": "The capital of Austria is Vienna. I find that topic",
+      "entity": "Vienna"
+    },
+    {
+      "stem": "The chemical symbol for iron is Fe. I find that topic",
+      "entity": "Fe"
+    },
+    {
+      "stem": "The chemical symbol for silver is Ag. I find that topic",
+      "entity": "Ag"
+    },
+    {
+      "stem": "The chemical symbol for potassium is K. I find that topic",
+      "entity": "K"
+    },
+    {
+      "stem": "The closest planet to the Sun is Mercury. I find that topic",
+      "entity": "Mercury"
+    },
+    {
+      "stem": "The planet known for its prominent rings is Saturn. I find that topic",
+      "entity": "Saturn"
+    },
+    {
+      "stem": "The red planet is called Mars. I find that topic",
+      "entity": "Mars"
+    },
+    {
+      "stem": "Water is composed of hydrogen and oxygen. I find that topic",
+      "entity": "oxygen"
+    },
+    {
+      "stem": "The first President of the United States was George Washington. I find that topic",
+      "entity": "Washington"
+    },
+    {
+      "stem": "The theory of relativity was developed by Albert Einstein. I find that topic",
+      "entity": "Einstein"
+    },
+    {
+      "stem": "The theory of evolution was proposed by Charles Darwin. I find that topic",
+      "entity": "Darwin"
+    },
+    {
+      "stem": "The largest country in the world by area is Russia. I find that topic",
+      "entity": "Russia"
+    },
+    {
+      "stem": "The largest desert in the world is the Sahara. I find that topic",
+      "entity": "Sahara"
+    },
+    {
+      "stem": "The currency of the United States is the dollar. I find that topic",
+      "entity": "dollar"
+    },
+    {
+      "stem": "The currency of the United Kingdom is the pound. I find that topic",
+      "entity": "pound"
+    },
+    {
+      "stem": "The opposite of hot is cold. I find that topic",
+      "entity": "cold"
+    },
+    {
+      "stem": "The fastest land animal is the cheetah. I find that topic",
+      "entity": "cheetah"
+    }
+  ]
+}

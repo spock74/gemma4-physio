@@ -1,0 +1,111 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+*.egg
+
+# Virtual envs
+.venv/
+venv/
+env/
+
+# Environment
+.env
+.env.local
+
+# Caches
+.cache/
+.pytest_cache/
+.mypy_cache/
+.pyright/
+.pyright_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# Tooling state
+.logfire/
+logs/
+
+# Project artifacts (large or sensitive)
+models/*
+!models/.gitkeep
+data/raw/*
+!data/raw/.gitkeep
+data/synthetic/*
+!data/synthetic/.gitkeep
+# eval data is typically small + version-friendly; keep tracked unless overridden
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+.gstack/
+
+# SAE calibration isolated venv + large capture artifacts
+calibration/.venv-sae/
+calibration/neuronpedia_fidelity/captures/*.pt
+calibration/neuronpedia_fidelity/captures/*.npz
+
+# probing calibration intermediates (regenerable)
+calibration/**/captures/
+calibration/**/__pycache__/
+
+# HTML & PDF documentation reports
+docs/**/*.html
+docs/**/*.pdf
+docs/*.html
+
+# Probing and evaluation results (large generated JSON files)
+data/eval/results/
+calibration/**/results/
+
+# Agent task queue folders
+.agent/active/
+.agent/done/
+.agent/blocked/
+.agent/queue/
+
+# Artefatos Gerados na Raiz
+results/
+plots/
+scratch/
+
+# Configuracoes de Assistentes Locais
+.claude/
+
+# Prevencao global contra arquivos de pesos pesados
+*.pt
+*.pth
+*.safetensors
+*.h5
+*.pkl
+
+# Test coverage
+.coverage
+coverage.xml
+htmlcov/
+
+# Arquivos de Documentacao, LaTeX e Temporarios
+*.html
+*.pdf
+*.tex
+*.aux
+*.bbl
+*.blg
+*.fls
+*.log
+*.out
+*.toc
+*.fdb_latexmk
+*.synctex.gz
+*.dvi
+*.lof
+*.lot

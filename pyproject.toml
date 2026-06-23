@@ -1,0 +1,97 @@
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[project]
+name = "gemma4-lab"
+version = "0.1.0"
+description = "Local Gemma 4 inference, fine-tuning, and agent lab on Apple Silicon."
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+authors = [{ name = "Elvano Moraes" }]
+license = { text = "MIT" }
+
+dependencies = [
+    # Core ML stack
+    "torch>=2.5",
+    "transformers>=5.5.1",
+    "accelerate>=1.10",
+    "peft>=0.18",
+    "trl>=0.20",
+    "datasets>=4.0",
+    # Pydantic + agents
+    "pydantic-ai>=1.89",
+    "pydantic-settings>=2.10",
+    # Indexing / embeddings (used in later phases; pinned now to lock the env)
+    "llama-index-core>=0.14",
+    "llama-index-embeddings-gemini>=0.4",
+    # Gemini SDK (NEW unified SDK, not the legacy google-generativeai)
+    "google-genai>=1.30",
+    # Observability — `pydantic-ai` is NOT a logfire extra (instrument method
+    # ships in core). Brief listed it; current logfire 4.x exposes only the
+    # extras shown here. Verified May 2026.
+    "logfire[httpx,system-metrics]>=4.0",
+    # CLI / TUI
+    "typer>=0.16",
+    "rich>=14.0",
+]
+
+[project.optional-dependencies]
+# CALIBRATION-ONLY — NOT for the core conda env. Used solely by
+# calibration/neuronpedia_fidelity/ to load third-party SAE weights for the
+# apparatus fidelity control. We use ONLY `SAE.from_pretrained` + `sae.encode`.
+#
+# ⚠️ DO NOT `pip install -e ".[calibration]"` INTO THE CORE ENV. sae-lens 6.x
+# imports transformer-lens at load, which requires torchvision<0.23, which
+# version-locks torch==2.7.1 — this DOWNGRADES the core env's torch (2.11.0) and
+# breaks the locked stack the E1/E2/E1c experiments are validated on. Install it
+# instead in the dedicated isolated venv: `calibration/.venv-sae` (see
+# calibration/neuronpedia_fidelity/README.md). The capture runs in the core env
+# (torch 2.11.0); only `sae.encode` on saved activations runs in the sae venv.
+calibration = [
+    "sae-lens",
+]
+
+[project.scripts]
+# Cross-surface task-queue CLI. After `pip install -e .` this is `agentq …`.
+# Points at the package module (not scripts/) so the entry point resolves;
+# importing it does not pull torch — see gemma4_lab/__init__.py.
+agentq = "gemma4_lab.agentq:main"
+
+[dependency-groups]
+dev = [
+    "pytest>=8",
+    "ruff>=0.8",
+    "pyright>=1.1.380",
+]
+# Phase 2 backends — keep declared so future agents see the slot.
+mlx = [
+    # "mlx-lm",
+]
+gguf = [
+    # "llama-cpp-python",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/gemma4_lab"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+ignore = ["E501"]  # long lines acceptable when intentional (URLs, prompts)
+
+[tool.pyright]
+pythonVersion = "3.12"
+typeCheckingMode = "standard"
+include = ["src", "scripts", "tests"]
+reportMissingImports = "warning"
+# Resolve heavy ML deps from the conda env this project lives in.
+venvPath = "/opt/anaconda3/envs"
+venv = "gemma4-lab"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
