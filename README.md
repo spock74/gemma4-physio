@@ -1,6 +1,6 @@
 # gemma4-lab
 
-> **Aviso Amigável:** Este projeto ainda está em uma fase bastante incipiente. No momento, o repositório está sendo usado muito mais como um backup seguro para o meu progresso do que para distribuição. O objetivo final é compartilhar o código com a comunidade, mas por enquanto, espere encontrar muita poeira, rascunhos e coisas pela metade! Sinta-se à vontade para olhar, mas vá com calma.
+> **Aviso Amigável:** Este projeto ainda está em uma fase bastante incipiente. No momento, o repositório está sendo usado muito mais como um backup seguro para o meu progresso do que para distribuição. O objetivo final é compartilhar o código com a comunidade, mas por enquanto, espere encontrar muita poeira, rascunhos e coisas pela metade! Mas, sinta-se à vontade!
 
 Local Gemma 4 inference + fine-tuning + agent lab on a Mac Mini M2 (16 GB unified memory). Phase 1 ships local HF-Transformers inference with full Logfire observability, plus a thin Gemini wrapper for later synthetic-data work.
 
