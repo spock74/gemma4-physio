@@ -2,7 +2,7 @@
 
 > **Aviso Amigável:** Este projeto ainda está em uma fase bastante incipiente. No momento, o repositório está sendo usado muito mais como um backup seguro para o meu progresso do que para distribuição. O objetivo final é compartilhar o código com a comunidade, mas por enquanto, espere encontrar muita poeira, rascunhos e coisas pela metade! Mas, sinta-se à vontade!
 
-Local Gemma 4 inference + fine-tuning + agent lab on a Mac Mini M2 (16 GB unified memory). Phase 1 ships local HF-Transformers inference with full Logfire observability, plus a thin Gemini wrapper for later synthetic-data work.
+Local Gemma 4 inference + fine-tuning + agent lab on a Mac Mini M2 (16 GB unified memory). Phase 1 ships local HF-Transformers inference, plus a thin Gemini wrapper for later synthetic-data work. *(Note: Full Logfire observability is coming very soon; it is already implemented in the sibling project `gemma4-lab`)*.
 
 ## Setup
 
@@ -53,7 +53,7 @@ jupyter lab notebooks/01_first_inference.ipynb
 
 ## Phase 1 scope
 
-Working: local Gemma 4 E2B/E4B inference (bf16, MPS+CPU offload), thinking-mode toggle, Logfire spans on every generation, Gemini 2.5 Pro client. Stubbed (`NotImplementedError` / TODO markers): MLX backend, llama.cpp/GGUF backend, LoRA fine-tuning, synthetic data generation, tool library, agents. 
+Working: local Gemma 4 E2B/E4B inference (bf16, MPS+CPU offload), thinking-mode toggle, Gemini 2.5 Pro client. Stubbed (`NotImplementedError` / TODO markers): Logfire observability (coming soon from `gemma4-lab`), MLX backend, llama.cpp/GGUF backend, LoRA fine-tuning, synthetic data generation, tool library, agents. 
 
 ### Hardware caveat (M2 / 16 GB)
 
