@@ -491,4 +491,6 @@ def main():
     return 0
 
 if __name__ == "__main__":
+    from gemma4_lab import observability
+    observability.setup()
     sys.exit(main())

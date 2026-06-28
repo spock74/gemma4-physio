@@ -19,6 +19,8 @@ import ripser
 
 # Suppress ripser columns vs rows warning
 warnings.filterwarnings("ignore", category=UserWarning, module="ripser")
+from sklearn.decomposition import PCA
+from scipy.stats import gaussian_kde
 
 # Ensure local path is in sys.path
 sys.path.append("/Users/moraes/Documents/PROJETOS/interpretability/started-june-26/zero/src")
@@ -150,6 +152,75 @@ def compute_tda_metrics(point_cloud, threshold):
             
     return betti_0, total_h1_persistence, h1_dgms
 
+def generate_scientific_plots(k_res, u_res, v1, v2_k, output_dir="figures"):
+    """
+    Gera as visualizações reais do espaço latente para o artigo em LaTeX.
+    k_res: lista ou tensor de ativações conhecidas (CPU, float)
+    u_res: lista ou tensor de ativações desconhecidas (CPU, float)
+    v1: vetor diferença de médias d_know (normalizado)
+    v2_k: vetor de contexto ortogonalizado (normalizado)
+    """
+    import os
+    os.makedirs(output_dir, exist_ok=True)
+    
+    # 1. Converter listas para arrays numpy
+    K_arr = torch.stack(k_res).squeeze().float().numpy() # [M_k, d]
+    U_arr = torch.stack(u_res).squeeze().float().numpy() # [M_u, d]
+    
+    v1_np = v1.squeeze().float().cpu().numpy()
+    v2_np = v2_k.squeeze().float().cpu().numpy()
+    
+    # Concatenar todos os dados
+    all_data = np.concatenate([K_arr, U_arr], axis=0) # [M_k + M_u, d]
+    labels = np.array([1]*len(K_arr) + [0]*len(U_arr)) # 1 para conhecido, 0 para desconhecido
+    
+    # ----------------------------------------------------
+    # PLOT A: Projeção Direta no Plano da Varredura S
+    # ----------------------------------------------------
+    proj_x = all_data @ v1_np
+    proj_y = all_data @ v2_np
+    
+    plt.figure(figsize=(6, 5))
+    plt.scatter(proj_x[labels==1], proj_y[labels==1], color='royalblue', alpha=0.7, label='Known Entities', edgecolors='none', s=40)
+    plt.scatter(proj_x[labels==0], proj_y[labels==0], color='crimson', alpha=0.7, label='Unknown Entities', edgecolors='none', s=40)
+    plt.xlabel(r"Primary Factual Coordinate ($\vec{h} \cdot \hat{v}_1$)", fontsize=11)
+    plt.ylabel(r"Orthogonal Context Coordinate ($\vec{h} \cdot \hat{v}_2$)", fontsize=11)
+    plt.title("2D Rotational Sweep Plane Projection (Gemma 3 4b-it)", fontsize=12, fontweight='bold', pad=12)
+    plt.legend(frameon=True, facecolor='white', edgecolor='none')
+    plt.grid(True, linestyle=':', alpha=0.5)
+    plt.tight_layout()
+    plt.savefig(f"{output_dir}/fig1_plane_projection.png", dpi=200)
+    plt.close()
+    
+    # ----------------------------------------------------
+    # PLOT B: Curva de Densidade 1D ao longo de d_know
+    # ----------------------------------------------------
+    plt.figure(figsize=(6, 4))
+    
+    # KDE para conhecidos
+    kde_k = gaussian_kde(proj_x[labels==1])
+    # KDE para desconhecidos
+    kde_u = gaussian_kde(proj_x[labels==0])
+    
+    x_eval = np.linspace(min(proj_x) - 10, max(proj_x) + 10, 500)
+    
+    plt.plot(x_eval, kde_k(x_eval), color='royalblue', lw=2.5, label='Known')
+    plt.fill_between(x_eval, kde_k(x_eval), color='royalblue', alpha=0.15)
+    
+    plt.plot(x_eval, kde_u(x_eval), color='crimson', lw=2.5, label='Unknown', linestyle='--')
+    plt.fill_between(x_eval, kde_u(x_eval), color='crimson', alpha=0.15)
+    
+    plt.xlabel(r"Projection onto Factual Axis $\vec{d}_{\text{know}}$", fontsize=11)
+    plt.ylabel("Probability Density", fontsize=11)
+    plt.title(r"1D Linear Separation along $\vec{d}_{\text{know}}$ (Gemma 3 4b-it)", fontsize=12, fontweight='bold', pad=12)
+    plt.legend(frameon=True, facecolor='white', edgecolor='none')
+    plt.grid(True, linestyle=':', alpha=0.5)
+    plt.tight_layout()
+    plt.savefig(f"{output_dir}/fig1_density_separability.png", dpi=200)
+    plt.close()
+    
+    print(f"Plots científicos salvos com sucesso em: '{output_dir}/'")
+
 def plot_h1_barcodes(h1_dgms, title, save_path):
     """Plots the persistence barcode for the 1D cycles."""
     plt.figure(figsize=(9, 4.5))
@@ -262,6 +333,8 @@ def main():
         v2_rand = w_rand - torch.dot(w_rand, v1) * v1
         v2_rand = v2_rand / (v2_rand.norm() + 1e-8)
         v2_rands.append(v2_rand)
+        
+    generate_scientific_plots(k_res, u_res, v1, v2_rands[0], output_dir="/Users/moraes/Documents/PROJETOS/interpretability/started-june-26/zero/docs/figures")
 
     # We run the TDA analysis on prompt 0: "The capital of France is"
     test_idx = 0
@@ -390,4 +463,6 @@ def main():
     return 0
 
 if __name__ == "__main__":
+    from gemma4_lab import observability
+    observability.setup()
     sys.exit(main())
