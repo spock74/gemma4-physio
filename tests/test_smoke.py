@@ -32,28 +32,29 @@ def test_secret_constants_read_from_environment(monkeypatch: pytest.MonkeyPatch)
     monkeypatch.setenv("HF_TOKEN", "fake-hf")
 
     # Re-import so the module-level constants pick up the patched env.
-    import gemma4_lab.config as cfg
+    import gemma4_lab.config.core as cfg_core
 
-    cfg = importlib.reload(cfg)
+    cfg_core = importlib.reload(cfg_core)
 
-    assert cfg.GEMINI_API_KEY == "fake-gemini-key"
-    assert cfg.LOGFIRE_TOKEN == "fake-logfire"
-    assert cfg.HF_TOKEN == "fake-hf"
+    assert cfg_core.GEMINI_API_KEY == "fake-gemini-key"
+    assert cfg_core.LOGFIRE_TOKEN == "fake-logfire"
+    assert cfg_core.HF_TOKEN == "fake-hf"
+    assert cfg_core.NEURONPEDIA_API_KEY == ""
 
     # Helpers reflect the constants.
-    assert cfg.require_gemini_key() == "fake-gemini-key"
-    assert cfg.logfire_token_or_none() == "fake-logfire"
-    assert cfg.hf_token_or_none() == "fake-hf"
+    assert cfg_core.require_gemini_key() == "fake-gemini-key"
+    assert cfg_core.logfire_token_or_none() == "fake-logfire"
+    assert cfg_core.hf_token_or_none() == "fake-hf"
 
 
 def test_require_gemini_key_raises_when_missing(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.delenv("GEMINI_API_KEY", raising=False)
-    import gemma4_lab.config as cfg
+    import gemma4_lab.config.core as cfg_core
 
-    cfg = importlib.reload(cfg)
-    assert cfg.GEMINI_API_KEY == ""
-    with pytest.raises(RuntimeError, match="GEMINI_API_KEY"):
-        cfg.require_gemini_key()
+    cfg_core = importlib.reload(cfg_core)
+    assert cfg_core.GEMINI_API_KEY == ""
+    with pytest.raises(RuntimeError, match="GEMINI_API_KEY is not set"):
+        cfg_core.require_gemini_key()
 
 
 def test_settings_has_no_secret_fields() -> None:

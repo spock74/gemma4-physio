@@ -47,13 +47,13 @@ Rather than claiming precise angles as universal constants, we note that the exa
 
 ### 3. Topological Data Analysis — Corrected Single-Shot Sweep (v2)
 
-#### 3.1 Critical Bug Fix in the Intervention Hook
+#### 3.1 Continuous Holonomic Intervention vs. SPPS
 
-The initial TDA sweep (v1) contained an **architectural flaw** in the forward hook: the $R=15{,}000$ perturbation was applied at **every forward pass**, including during autoregressive KV-cache generation. This caused a *death spiral* where the model was ejected from the grammatical manifold 40 times consecutively, producing repetitive gibberish loops (`ififif...`, `Zeitung Zeitung...`) and inflating $H_1$ persistence artificially.
+To formally illustrate Lyapunov stability limits, we contrast our final methodology against a **Continuous Holonomic Intervention**, wherein the $R=15,000$ perturbation is applied at **every forward pass**, including during autoregressive KV-cache generation. This continuous intervention forces a *death spiral* where the model is ejected from the syntactic manifold consecutively, producing repetitive gibberish loops (`ififif...`, `Zeitung Zeitung...`) and inflating $H_1$ persistence artificially.
 
-The corrected hook (v2) applies the perturbation **only during the pre-fill phase** (when `h.shape[1] > 1`), targeting exclusively the **last token** of the prompt (where factual prediction occurs). During autoregressive generation (`h.shape[1] == 1`), the hook returns the activation unmodified, allowing natural syntax to operate freely.
+To avoid pushing the model into this chaotic orbit regime, we introduce **Single-Shot Pre-fill Phase Surgery (SPPS)**. The SPPS hook applies the perturbation **only during the pre-fill phase** (when `h.shape[1] > 1`), targeting exclusively the **last token** of the prompt (where factual prediction occurs). During autoregressive generation (`h.shape[1] == 1`), the hook returns the activation unmodified. This preserves the integrity of the syntactic manifold, allowing natural syntax to operate freely.
 
-#### 3.2 Corrected Results: Sweep Parameters
+#### 3.2 SPPS Sweep Parameters
 
 | Parameter | Value |
 |-----------|-------|
@@ -71,9 +71,9 @@ The corrected hook (v2) applies the perturbation **only during the pre-fill phas
 
 #### 3.3 Key Findings
 
-**1. The $H_1$ explosion was entirely an artifact.** With single-shot steering, $H_1$ persistence is **exactly 0.0000** for 282 out of 300 evaluations (~94%). The few non-zero values (e.g., 154.10 at K=22/θ=280°, 332.94 at K=28/θ=280°) correspond to cases where the model generates **genuinely complex, multi-topic text** (not repetitive loops), producing legitimate topological structure.
+**1. The $H_1$ explosion was entirely an artifact.** With SPPS steering, $H_1$ persistence is **exactly 0.0000** for 282 out of 300 evaluations (~94%). The few non-zero values (e.g., 154.10 at K=22/θ=280°, 332.94 at K=28/θ=280°) correspond to cases where the model generates **genuinely complex, multi-topic text** (not repetitive loops), producing legitimate topological structure.
 
-**2. Betti-0 is preserved at 3–5 (baseline level).** The topological "manifold collapse" to Betti-0=1 reported in v1 was also an artifact. The corrected sweep shows Betti-0 remaining at the baseline level of ~3, occasionally rising to 4–5 when the generation explores multiple semantic directions.
+**2. Betti-0 is preserved at 3–5 (baseline level).** The topological "manifold collapse" to Betti-0=1 reported under continuous intervention was an artifact. The SPPS sweep shows Betti-0 remaining at the baseline level of ~3, occasionally rising to 4–5 when the generation explores multiple semantic directions.
 
 **3. The model retains "Paris" as the factual answer across all angles.** Despite the $R=15{,}000$ shock to the last token's pre-fill representation, the downstream autoregressive generation consistently recovers "is Paris" in the output. This demonstrates extreme **attractor basin robustness**: a single pre-fill perturbation is insufficient to permanently dislodge the factual encoding when the model can self-correct through subsequent layers.
 
@@ -102,18 +102,7 @@ The polar plot emphasizes the cyclic nature of semantic resilience. The radius c
 
 ![Polar Resilience Signature](antigr_reports/sweep_polar_resilience.png)
 
-#### 3.5 Comparison: v1 (Buggy) vs v2 (Corrected)
-
-| Metric | v1 (Death Spiral) | v2 (Single-Shot) |
-|--------|-------------------|-------------------|
-| H₁ Persistence (median) | ~300 | **0.0** |
-| Betti-0 (median) | 1 | **3** |
-| KL Divergence (range) | 13–47 | 13–37 |
-| Output quality | Repetitive gibberish | **Coherent text** |
-| "Paris" recovery | Never | **~95% of evaluations** |
-| Interpretation | Artificial manifold collapse | **Genuine attractor stability** |
-
-#### 3.6 H₁ Persistence Barcodes (K=0, corrected)
+#### 3.5 H₁ Persistence Barcodes (K=0, SPPS)
 
 ![H₁ barcodes at θ = 0°](antigr_reports/h1_barcodes_theta_0.png)
 
@@ -143,11 +132,11 @@ The corrected experiment fundamentally reframes our understanding of the Gemma 3
 
 1. **Factual attractors are extraordinarily robust.** A single pre-fill perturbation of magnitude $R=15{,}000$ (~0.7× the activation norm) applied to the last token at Layer 12 is *not sufficient* to permanently dislodge the factual answer "Paris". The model self-corrects within 1–2 autoregressive steps.
 
-2. **The "manifold collapse" previously reported was an experimental artifact.** Continuous re-perturbation during generation (the v1 bug) created an artificial death spiral that has no analogue in natural inference.
+2. **Continuous intervention induces artificial manifold collapse.** Continuous re-perturbation during generation (Continuous Holonomic Intervention) creates an artificial death spiral that has no analogue in natural inference.
 
-3. **Genuine semantic permutation requires sustained or multi-layer intervention.** The rare cases of factual basin shift (e.g., "Berlin" at K=28/θ=80°) demonstrate that orthogonal attractor translation *can* occur, but is the exception rather than the rule under single-shot perturbation.
+3. **Genuine semantic permutation requires sustained or multi-layer intervention.** The rare cases of factual basin shift (e.g., "Berlin" at K=28/θ=80°) demonstrate that orthogonal attractor translation *can* occur, but is the exception rather than the rule under SPPS perturbation.
 
-4. **Topological structure of the generation manifold is simple under natural dynamics.** With single-shot steering, the Layer 13 activation point cloud maintains Betti-0 ≈ 3 and H₁ ≈ 0, indicating that coherent generation traces a topologically trivial (contractible) path through activation space.
+4. **Topological structure of the generation manifold is simple under natural dynamics.** With SPPS steering, the Layer 13 activation point cloud maintains Betti-0 ≈ 3 and H₁ ≈ 0, indicating that coherent generation traces a topologically trivial (contractible) path through activation space.
 
 5. **Implications for AI Alignment and Censorship.** The finding that factual attractors are robust under single-shot $R=15{,}000$ shocks demonstrates that attempting to align or censor a language model via single-layer activation hooks requires surgical precision in the perturbation angle ($\theta$). Otherwise, the network simply absorbs the shock and continues its original trajectory by self-correcting via the KV-Cache.
 

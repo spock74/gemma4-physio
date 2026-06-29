@@ -4,6 +4,16 @@
 
 Local Gemma 4 inference + fine-tuning + agent lab on a Mac Mini M2 (16 GB unified memory). Phase 1 ships local HF-Transformers inference with full Logfire observability, plus a thin Gemini wrapper for later synthetic-data work.
 
+## A Note on Naming: Why Gemma 3?
+
+You might notice that despite the project being named **gemma4-lab**, the vast majority of the topological experiments and causal ablation sweeps (e.g., in `scripts/o6_topology.py` and the `O4` modules) are conducted using the **Gemma 3** architecture (specifically `gemma-3-4b-it` and `gemma-3-270m-it`). 
+
+This temporary mismatch exists for two pragmatic research reasons:
+1. **Tooling Compatibility (Gemma Scope):** State-of-the-art interpretability tooling, specifically the Gemma Scope Sparse Autoencoders (SAEs), is currently far more mature and accessible for the Gemma 3 ecosystem.
+2. **Hardware Constraints:** The local research hardware (Mac Mini M2, 16GB RAM) currently faces memory constraints when running full, unquantized single-shot perturbation sweeps on the newer, heavier Gemma 4 models (e.g., Gemma 4 12B Unified).
+
+This limitation is actively being addressed in upcoming project phases via GGUF/MLX quantization and memory optimizations, which will pave the way for the full transition of the codebase to Gemma 4.
+
 ## Setup
 
 Requires conda + Python 3.12.
@@ -58,6 +68,56 @@ Working: local Gemma 4 E2B/E4B inference (bf16, MPS+CPU offload), thinking-mode 
 ### Hardware caveat (M2 / 16 GB)
 
 `gemma-4-E2B-it` ships ~9.5 GB of weights (MatFormer: same file as E4B). M2 Metal's per-buffer cap (~7 GiB) rejects a naïve `device_map="mps"` load. Phase 1 works around this with `device_map="auto"` + `max_memory={"mps": "6GiB", "cpu": "14GiB"}` — accelerate offloads ~3/4 of the layers to CPU, so generation is slow (~0.4 tok/s). Phase 2 GGUF/MLX backends will fix this with quantization.
+
+## Arquitetura: Declarative Configuration-as-Code
+
+O repositório passou por uma **refatoração arquitetural profunda** para adotar o paradigma de `Configuration-as-Code`, migrando de um design de pipeline monolítico para um orquestrador modular, extensível e totalmente fracamente acoplado (*loosely coupled*).
+
+### O Orquestrador (Pipeline Manager)
+
+Em vez de scripts rígidos, o pipeline agora é guiado unicamente pelo `pipeline_config.yaml`. Usamos esquemas estritos do **Pydantic v2** (`src/gemma4_lab/config/pipeline_schema.py`) para validar as intenções de execução antes de sequer tocar na GPU. 
+
+O orquestrador central (`scripts/run_pipeline.py`) carrega o `ActivationRecorder` e o LLM uma única vez na memória e os roteia por injeção de dependência através das etapas do grafo (DAG) que estiverem habilitadas.
+
+```mermaid
+graph TD
+    YAML[pipeline_config.yaml] -->|Pydantic v2 Validation| Schema[PipelineConfig Schema]
+    Schema --> Orchestrator
+    
+    subgraph "Pipeline Orchestrator (run_pipeline.py)"
+        Orchestrator -->|Init 1x| GPU[(Gemma Model &<br>ActivationRecorder)]
+        GPU -.-> |Dependency Injection| Extract
+        GPU -.-> |Dependency Injection| TDA
+        GPU -.-> |Dependency Injection| CASAL
+    end
+    
+    subgraph "Decoupled Components (src/gemma4_lab/interp/)"
+        Extract(Direction Extraction<br/>extraction.py)
+        TDA(Topological Sweep<br/>topological_sweep.py)
+        CASAL(Weight Amortization<br/>weight_amortization.py)
+    end
+    
+    Extract -->|Outputs d_vector.pt| TDA
+    TDA -->|Generates JSON metrics| CASAL
+    CASAL -->|Saves Fine-tuned Layers| Disk[(Checkpoint)]
+    
+    style YAML fill:#f9f,stroke:#333,stroke-width:2px
+    style GPU fill:#bbf,stroke:#333,stroke-width:2px
+    style Orchestrator fill:#dfd,stroke:#333,stroke-width:2px
+```
+
+### Componentes de Interpretabilidade
+
+A inteligência matemática foi isolada em componentes de domínio puro, tornando o *core* agnóstico de infraestrutura:
+
+1. **Direction Extraction**: Extração causal via *Factual Probing* usando hooks de intervenção limpos.
+2. **Topological Sweep (TDA)**: Rotaciona o vetor gerado através de *control planes* ortogonais. Captura nuvens de pontos e roda extração de invariantes Betti usando TDA (Topological Data Analysis via `ripser`).
+3. **Weight Amortization (CASAL)**: Lida com manipulação avançada do *Autograd* graph, congelando as representações globais do modelo e aplicando `.backward()` exclusivamente na `layer_target` sem vazar gradientes ou acoplar-se ao *loop* de dados principal.
+
+### Testes: Sociable Testing
+
+Adotamos a filosofia estrita de **Sociable Testing**, banindo `Mock` objects. 
+Em `tests/conftest.py`, implementamos o `TinyTransformer` — um mini-modelo PyTorch real, matematicamente congruente, porém com `d_model=16` e dimensões restritas. Isso permite que todos os testes (`pytest tests/`) exercitem a matemática completa dos tensores, propagação real do autograd e interceptação fidedigna dos hooks de PyTorch, garantindo robustez extrema com execução em milissegundos.
 
 ## Acknowledgments
 
