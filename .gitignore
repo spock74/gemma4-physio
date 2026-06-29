@@ -98,6 +98,7 @@ htmlcov/
 *.pdf
 *.tex
 !docs/in-tex/*.tex
+!docs/in-tex/*.pdf
 *.aux
 *.bbl
 *.blg
