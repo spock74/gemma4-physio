@@ -97,6 +97,7 @@ htmlcov/
 *.html
 *.pdf
 *.tex
+!docs/in-tex/*.tex
 *.aux
 *.bbl
 *.blg
