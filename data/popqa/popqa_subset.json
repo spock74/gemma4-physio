@@ -1,0 +1,14 @@
+[
+  {
+    "id": 1,
+    "wikipedia_views": 200000,
+    "question": "What is the capital of France?",
+    "answer": "Paris"
+  },
+  {
+    "id": 2,
+    "wikipedia_views": 10,
+    "question": "Who is the obscure author of this obscure book?",
+    "answer": "Unknown"
+  }
+]
