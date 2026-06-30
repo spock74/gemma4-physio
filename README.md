@@ -1,131 +1,134 @@
-# gemma4-lab
+<!-- Copyright (c) 2026 Jose E Moraes. All rights reserved. -->
+# gemma4-physio
 
-> **Aviso Amigável:** Este projeto ainda está em uma fase bastante incipiente. No momento, o repositório está sendo usado muito mais como um backup seguro para o meu progresso do que para distribuição. O objetivo final é compartilhar o código com a comunidade, mas por enquanto, espere encontrar muita poeira, rascunhos e coisas pela metade! Mas, sinta-se à vontade!
+> **Aviso Amigável:** Este projeto está em fase de pesquisa ativa de interpretabilidade geométrica. O repositório armazena o progresso dos experimentos de representação conceitual e mecânica de atratores no Gemma-3 (4B). Espere encontrar atualizações frequentes e evoluções nos scripts de análise matemática! Sinta-se à vontade para explorar.
 
-Local Gemma 4 inference + fine-tuning + agent lab on a Mac Mini M2 (16 GB unified memory). Phase 1 ships local HF-Transformers inference with full Logfire observability, plus a thin Gemini wrapper for later synthetic-data work.
+Mapeamento geométrico de conceitos, perturbação causal de subespaços e estabilização topológica downstream em arquiteturas Gemma-3 no macOS local (Mac Mini M2, 16 GB de memória unificada).
 
-## A Note on Naming: Why Gemma 3?
+---
 
-You might notice that despite the project being named **gemma4-lab**, the vast majority of the topological experiments and causal ablation sweeps (e.g., in `scripts/o6_topology.py` and the `O4` modules) are conducted using the **Gemma 3** architecture (specifically `gemma-3-4b-it` and `gemma-3-270m-it`). 
+## 1. A Note on Naming: Why Gemma 3?
 
-This temporary mismatch exists for two pragmatic research reasons:
-1. **Tooling Compatibility (Gemma Scope):** State-of-the-art interpretability tooling, specifically the Gemma Scope Sparse Autoencoders (SAEs), is currently far more mature and accessible for the Gemma 3 ecosystem.
-2. **Hardware Constraints:** The local research hardware (Mac Mini M2, 16GB RAM) currently faces memory constraints when running full, unquantized single-shot perturbation sweeps on the newer, heavier Gemma 4 models (e.g., Gemma 4 12B Unified).
+Apesar de o repositório principal possuir o nome histórico de **gemma4-physio** (preparado para futuras integrações com Gemma 4), os experimentos atuais de perturbação geométrica, Causal Scrubbing e análise topológica (TDA) são realizados sobre o modelo **Gemma-3-4B-it**. 
 
-This limitation is actively being addressed in upcoming project phases via GGUF/MLX quantization and memory optimizations, which will pave the way for the full transition of the codebase to Gemma 4.
+Isso ocorre por dois motivos fundamentais:
+1. **Compatibilidade de Tooling:** Ferramentas de interpretabilidade e modelos comparativos (como os dicionários de autocodificadores esparsos - SAEs do Gemma Scope) encontram-se maduros e validados para o ecossistema Gemma 3.
+2. **Restrições de Hardware Locais:** A inferência unificada e as passagens repetidas de gradiente/ablação sob MPS em modelos maiores de 12B+ esgotariam o buffer unificado do chip M2 de 16GB, exigindo técnicas de quantização pesadas (GGUF/MLX) planejadas para as próximas etapas.
 
-## Setup
+---
 
-Requires conda + Python 3.12.
+## 2. Setup do Ambiente
 
+O projeto exige o gerenciador de pacotes **Conda** e Python 3.12.
+
+Criação do ambiente virtual isolado:
 ```bash
 conda create -n gemma4-lab python=3.12 -y
 conda activate gemma4-lab
+```
+
+Instalação do instalador rápido `uv` e das dependências em modo editável (instalando o pacote `gemma4-physio` e registrando o utilitário de linha de comando `physio`):
+```bash
 pip install uv
 uv pip install -e . --group dev
 ```
 
-## Environment variables
+---
 
-The project reads three variables from the **shell environment** (assumed to be exported in `~/.zshrc` / `~/.bashrc` — no action required if they're already there):
+## 3. Variáveis de Ambiente
 
-| Var | Used by | Notes |
+O projeto lê as variáveis do shell de desenvolvimento (definidas via export no seu `~/.zshrc` / `~/.bashrc`):
+
+| Variável | Utilidade | Observação |
 |---|---|---|
-| `GEMINI_API_KEY` | `GeminiClient`, `verify_setup` | Gemini Developer API (https://aistudio.google.com/apikey) |
-| `HF_TOKEN` | `GemmaLocal` model load | Hugging Face Hub. Accept the Gemma 4 license on the HF model page first. |
-| `LOGFIRE_TOKEN` | `observability.setup()` | Optional. Without it, Logfire runs local-only. |
+| `GEMINI_API_KEY` | Integrações com modelos remotos | API Key do Google AI Studio (https://aistudio.google.com/apikey) |
+| `HF_TOKEN` | Download de pesos do Gemma-3-4B-it | Hugging Face Token. Aceite os termos de licença do Gemma-3 no site do HF antes. |
+| `LOGFIRE_TOKEN` | Telemetria e Spans de execução | Opcional. Sem ele, a coleta do Logfire roda em modo estritamente offline. |
 
-The keys are read **once** at import time inside `src/gemma4_lab/config.py` and exposed as module constants. Code that needs them does `from gemma4_lab.config import GEMINI_API_KEY` (or `require_gemini_key()`). Secrets are NEVER passed via `Settings` or constructor arguments, NEVER hardcoded, and NEVER asked to be re-exported by setup steps.
+As configurações são importadas automaticamente uma única vez a partir do arquivo `src/gemma4_physio/config.py`.
 
-A `.env` file in the project root is supported as an override for development, but the shell environment wins when both are set.
+---
 
-## Verify install
+## 4. O Utilitário CLI (`physio`)
 
-```bash
-python scripts/verify_setup.py
-```
+O repositório disponibiliza um CLI unificado chamado **`physio`**, registrado no ambiente conda após a instalação editável (`pip install -e .`). O CLI gerencia a execução dos testes geométricos de forma isolada e segura.
 
-Prints a Rich pass/fail table. First run downloads ~5 GB of Gemma 4 E2B weights — give it a few minutes on the first call.
+### Proteção Anti-OOM Nativa (Metal Performance Shaders - MPS)
+Para evitar que múltiplos experimentos concorrentes esgotem a memória unificada do chip Apple Silicon e congelem o macOS, a CLI implementa uma trava exclusiva de arquivo (`fcntl.flock` em `/tmp/gemma4_physio_model.lock`). Se uma execução já estiver ativa no sistema, qualquer novo comando de pipeline será abortado com um erro crítico antes de alocar memória.
 
-## Inference CLI
+### Comandos da CLI:
 
-```bash
-python scripts/infer.py "Explain attention in one paragraph"
-python scripts/infer.py "Solve: 17 * 23" --thinking
-python scripts/infer.py "Hi" --model e4b --max-tokens 64
-```
+A CLI possui duas ramificações principais de comandos: `run` (execução de pipelines) e `config` (gerenciamento de parâmetros).
 
-## Notebook
+#### Comandos de Configuração:
+* **`physio config set-logfire --enable` / `--disable`**  
+  Ativa ou desativa o envio de telemetria externa para o painel do Logfire no arquivo `pipeline_config.yaml`.
 
-```bash
-jupyter lab notebooks/01_first_inference.ipynb
-```
+#### Comandos de Execução:
+* **`physio run identity`**  
+  Executa o pipeline de **Identidade de Subespaço**. Coleta ativações na Camada 12 e projeta em PCA e UMAP para mostrar a segregação semântica.
+* **`physio run scrubbing`**  
+  Executa o pipeline de **Causal Scrubbing em Camada Única** perturbando a direção factual na Camada 12 (com amostragem purificada).
+* **`physio run multi-scrubbing`**  
+  Executa o pipeline de **Causal Scrubbing Multicamada**. Aplica ablação simultânea em série na Camada 12 e na zona de reparo downstream (Layers 20-26) sob amostragem purificada.
+* **`physio run freeman`**  
+  Executa o pipeline de **Estabilização de Freeman**. Rotaciona a ativação na Camada 12 sob magnitude causal ativa ($R=15000$) e realiza varredura downstream via TDA (Ripser) para calcular persistência homológica ($H_0$ e $H_1$).
+* **`physio run all`**  
+  Carrega o modelo na GPU uma única vez e executa sequencialmente todos os pipelines que estiverem com a chave `enabled: true` no arquivo `pipeline_config.yaml`, limpando o cache MPS após cada rodada.
 
-## Phase 1 scope
+---
 
-Working: local Gemma 4 E2B/E4B inference (bf16, MPS+CPU offload), thinking-mode toggle, Logfire spans on every generation, Gemini 2.5 Pro client. Stubbed (`NotImplementedError` / TODO markers): MLX backend, llama.cpp/GGUF backend, LoRA fine-tuning, synthetic data generation, tool library, agents. 
+## 5. Arquitetura Modular
 
-### Hardware caveat (M2 / 16 GB)
+O repositório é guiado por uma abordagem declarativa de **Configuration-as-Code**. O orquestrador central é controlado pelo arquivo de parametrização `pipeline_config.yaml` e validado por esquemas Pydantic v2.
 
-`gemma-4-E2B-it` ships ~9.5 GB of weights (MatFormer: same file as E4B). M2 Metal's per-buffer cap (~7 GiB) rejects a naïve `device_map="mps"` load. Phase 1 works around this with `device_map="auto"` + `max_memory={"mps": "6GiB", "cpu": "14GiB"}` — accelerate offloads ~3/4 of the layers to CPU, so generation is slow (~0.4 tok/s). Phase 2 GGUF/MLX backends will fix this with quantization.
-
-## Arquitetura: Declarative Configuration-as-Code
-
-O repositório passou por uma **refatoração arquitetural profunda** para adotar o paradigma de `Configuration-as-Code`, migrando de um design de pipeline monolítico para um orquestrador modular, extensível e totalmente fracamente acoplado (*loosely coupled*).
-
-### O Orquestrador (Pipeline Manager)
-
-Em vez de scripts rígidos, o pipeline agora é guiado unicamente pelo `pipeline_config.yaml`. Usamos esquemas estritos do **Pydantic v2** (`src/gemma4_lab/config/pipeline_schema.py`) para validar as intenções de execução antes de sequer tocar na GPU. 
-
-O orquestrador central (`scripts/run_pipeline.py`) carrega o `ActivationRecorder` e o LLM uma única vez na memória e os roteia por injeção de dependência através das etapas do grafo (DAG) que estiverem habilitadas.
+### Fluxo de Execução do Sistema:
 
 ```mermaid
 graph TD
-    YAML[pipeline_config.yaml] -->|Pydantic v2 Validation| Schema[PipelineConfig Schema]
-    Schema --> Orchestrator
+    YAML[pipeline_config.yaml] -->|Carregamento e Validação| Config[src/gemma4_physio/config.py]
+    Config --> CLI[src/gemma4_physio/cli.py]
     
-    subgraph "Pipeline Orchestrator (run_pipeline.py)"
-        Orchestrator -->|Init 1x| GPU[(Gemma Model &<br>ActivationRecorder)]
-        GPU -.-> |Dependency Injection| Extract
-        GPU -.-> |Dependency Injection| TDA
-        GPU -.-> |Dependency Injection| CASAL
+    subgraph "CLI Utility (physio)"
+        CLI -->|Executa| RunAll[physio run all]
+        CLI -->|Executa| RunSingle[physio run <pipeline>]
     end
     
-    subgraph "Decoupled Components (src/gemma4_lab/interp/)"
-        Extract(Direction Extraction<br/>extraction.py)
-        TDA(Topological Sweep<br/>topological_sweep.py)
-        CASAL(Weight Amortization<br/>weight_amortization.py)
+    subgraph "Pipelines Orquestrados (src/gemma4_physio/pipelines/)"
+        RunSingle -->|1. Identidade de Subespaço| Subspace[subspace_identity.py]
+        RunSingle -->|2. Causal Scrubbing Single-Layer| Scrub[causal_scrubbing.py]
+        RunSingle -->|3. Causal Scrubbing Multi-Layer| MultiScrub[multi_causal_scrubbing.py]
+        RunSingle -->|4. Estabilização de Freeman| Freeman[freeman_stabilization.py]
     end
     
-    Extract -->|Outputs d_vector.pt| TDA
-    TDA -->|Generates JSON metrics| CASAL
-    CASAL -->|Saves Fine-tuned Layers| Disk[(Checkpoint)]
+    subgraph "Core de Interpretabilidade (src/gemma4_physio/)"
+        Subspace & Scrub & MultiScrub & Freeman -. -->|Carrega Dados| Loader[data_loader.py]
+        Subspace & Scrub & MultiScrub & Freeman -. -->|Extrai Direções| Dirs[directions.py]
+        Scrub & MultiScrub & Freeman -. -->|Injeta Ganchos| Hooks[spps_hooks.py]
+        Freeman -. -->|Cálculos TDA| TDA[tda_engine.py]
+    end
+    
+    Loader -->|Lê| PopQA[data/popqa/popqa_full.json]
+    TDA -->|Processa| Ripser[ripser]
     
     style YAML fill:#f9f,stroke:#333,stroke-width:2px
-    style GPU fill:#bbf,stroke:#333,stroke-width:2px
-    style Orchestrator fill:#dfd,stroke:#333,stroke-width:2px
+    style CLI fill:#dfd,stroke:#333,stroke-width:2px
+    style Ripser fill:#bbf,stroke:#333,stroke-width:2px
 ```
 
-### Componentes de Interpretabilidade
+### Principais Módulos Internos:
+* **`spps_hooks.py`:** Mecanismo de injeção de hooks no residual stream do PyTorch. Suporta perturbações rotacionais isoladas e ablação multicamada concorrente via `ExitStack`.
+* **`data_loader.py`:** Amostrador PopQA. Contém a lógica do `Purified Sampler` que remove atalhos estatísticos (cópias nominais diretas no prompt e vazamentos ortográficos de caracteres).
+* **`directions.py`:** Algoritmo de extração de direções de conceitos factuais por Diferença de Médias (Difference-of-Means).
+* **`tda_engine.py`:** Motor matemático de TDA. Constrói complexos de Vietoris-Rips e calcula diagramas de persistência homológica para as órbitas do circuito de reparo.
 
-A inteligência matemática foi isolada em componentes de domínio puro, tornando o *core* agnóstico de infraestrutura:
+---
 
-1. **Direction Extraction**: Extração causal via *Factual Probing* usando hooks de intervenção limpos.
-2. **Topological Sweep (TDA)**: Rotaciona o vetor gerado através de *control planes* ortogonais. Captura nuvens de pontos e roda extração de invariantes Betti usando TDA (Topological Data Analysis via `ripser`).
-3. **Weight Amortization (CASAL)**: Lida com manipulação avançada do *Autograd* graph, congelando as representações globais do modelo e aplicando `.backward()` exclusivamente na `layer_target` sem vazar gradientes ou acoplar-se ao *loop* de dados principal.
+## 6. Testes Automatizados (Sociable Testing)
 
-### Testes: Sociable Testing
+Todos os componentes matemáticos e hooks do PyTorch são testados de forma automatizada sem o uso de mocks. Em `tests/conftest.py`, implementamos o `TinyTransformer`, um modelo PyTorch minimalista de 2 camadas que opera em `d_model=16` de forma a propagar gradientes reais e simular a infraestrutura do modelo em milissegundos.
 
-Adotamos a filosofia estrita de **Sociable Testing**, banindo `Mock` objects. 
-Em `tests/conftest.py`, implementamos o `TinyTransformer` — um mini-modelo PyTorch real, matematicamente congruente, porém com `d_model=16` e dimensões restritas. Isso permite que todos os testes (`pytest tests/`) exercitem a matemática completa dos tensores, propagação real do autograd e interceptação fidedigna dos hooks de PyTorch, garantindo robustez extrema com execução em milissegundos.
-
-## Acknowledgments
-
-This project builds upon the open-source infrastructure and foundational models provided by the community. A special thanks to:
-
-* **Google / DeepMind & Google Health**: For the release of the **Gemma 4** and **MedGemma** models, and to their interpretability teams for the continuous research in making these models transparent and accessible.
-* **Hugging Face**: For the essential ecosystem, libraries (such as `transformers`), and tools that make local experimentation with state-of-the-art models possible.
-* **Neuronpedia**: For their outstanding platform and tools that democratize mechanistic interpretability research and make exploring Sparse Autoencoder (SAE) features accessible.
-* **Anthropic Interpretability Team**: For pioneering the foundational research on Dictionary Learning and Sparse Autoencoders that makes modern mechanistic interpretability workflows possible.
-* **Pydantic & Logfire Teams**: For providing exceptional tooling for agentic AI architectures and advanced observability.
-* **Apple Machine Learning Research & MLX Community**: For their ongoing work in optimizing machine learning infrastructure for Apple Silicon, which empowers local AI development.
+Para executar os testes:
+```bash
+KMP_DUPLICATE_LIB_OK=TRUE PYTHONPATH=src python -m pytest -vv
+```
