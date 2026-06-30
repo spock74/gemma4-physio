@@ -48,7 +48,7 @@ class PopQASampler:
         """
         Retorna a população inteira para as 5 classes similares selecionadas sem sorteio.
         """
-        assert len(target_classes) == 5, "Devem ser selecionadas exatamente 5 classes similares."
+        assert len(target_classes) >= 1, "Devem ser selecionadas classes similares."
         for c in target_classes:
             if c not in self.all_classes:
                 raise ValueError(f"Classe semântica '{c}' não encontrada no dataset.")

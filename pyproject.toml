@@ -3,11 +3,11 @@ requires = ["hatchling>=1.27"]
 build-backend = "hatchling.build"
 
 [project]
-name = "gemma4-lab"
+name = "gemma4-physio"
 version = "0.1.0"
 description = "Local Gemma 4 inference, fine-tuning, and agent lab on Apple Silicon."
 readme = "README.md"
-requires-python = ">=3.12,<3.13"
+requires-python = ">=3.12,<3.14"
 authors = [{ name = "Elvano Moraes" }]
 license = { text = "MIT" }
 
@@ -34,6 +34,14 @@ dependencies = [
     # CLI / TUI
     "typer>=0.16",
     "rich>=14.0",
+    # Scientific & Interpretability dependencies
+    "umap-learn>=0.5",
+    "ripser>=0.6",
+    "persim>=0.3",
+    "scipy>=1.12",
+    "matplotlib>=3.8",
+    "tqdm>=4.66",
+    "scikit-learn>=1.4",
 ]
 
 [project.optional-dependencies]
@@ -53,10 +61,8 @@ calibration = [
 ]
 
 [project.scripts]
-# Cross-surface task-queue CLI. After `pip install -e .` this is `agentq …`.
-# Points at the package module (not scripts/) so the entry point resolves;
-# importing it does not pull torch — see gemma4_lab/__init__.py.
-agentq = "gemma4_lab.agentq:main"
+# Cross-surface task-queue CLI. After `pip install -e .` this is `physio …`.
+physio = "gemma4_physio.cli:app"
 
 [dependency-groups]
 dev = [
@@ -73,7 +79,7 @@ gguf = [
 ]
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/gemma4_lab"]
+packages = ["src/gemma4_physio"]
 
 [tool.ruff]
 line-length = 100
@@ -87,6 +93,12 @@ ignore = ["E501"]  # long lines acceptable when intentional (URLs, prompts)
 pythonVersion = "3.12"
 typeCheckingMode = "standard"
 include = ["src", "scripts", "tests"]
+exclude = [
+    "**/node_modules",
+    "**/__pycache__",
+    "models/hf-cache",
+    "data"
+]
 reportMissingImports = "warning"
 # Resolve heavy ML deps from the conda env this project lives in.
 venvPath = "/opt/anaconda3/envs"

@@ -41,3 +41,36 @@ def spps_rotational_hook(layer: nn.Module, v1: torch.Tensor, v2: torch.Tensor, t
         yield
     finally:
         handle.remove()
+
+@contextmanager
+def spps_ablation_hook(layer: nn.Module, v1: torch.Tensor, v2: torch.Tensor):
+    """
+    Context manager para registrar o gancho de ablação (Causal Scrubbing) no pre-fill.
+    Zera (subtrai) os componentes ao longo das direções v1 e v2, sem adicionar ruído compensatório.
+    """
+    def hook_fn(_module, _input, output):
+        h = output[0] if isinstance(output, tuple) else output
+        
+        if h.shape[1] == 1:
+            return output
+            
+        h_last = h[:, -1:, :]
+        clean_norm = h_last.norm(dim=-1, keepdim=True)
+        
+        proj_v1 = torch.einsum('bsd,d->bs', h_last, v1).unsqueeze(-1) * v1
+        proj_v2 = torch.einsum('bsd,d->bs', h_last, v2).unsqueeze(-1) * v2
+        
+        patched_raw = h_last - (proj_v1 + proj_v2)
+        patched_norm = patched_raw.norm(dim=-1, keepdim=True) + 1e-8
+        h_last_patched = patched_raw * (clean_norm / patched_norm)
+        
+        h_out = h.clone()
+        h_out[:, -1:, :] = h_last_patched
+        
+        return (h_out, *output[1:]) if isinstance(output, tuple) else h_out
+
+    handle = layer.register_forward_hook(hook_fn)
+    try:
+        yield
+    finally:
+        handle.remove()
