@@ -80,16 +80,17 @@ class PopQASampler:
             purified_population = []
             
             for item in population:
-                question = item.get("question", "").lower()
-                subject = item.get("subject", "").lower()
+                question = (item.get("question") or "").lower()
+                subject = (item.get("subject") or "").lower()
                 
                 # Parse answers
                 try:
-                    answers = json.loads(item['answer'])
+                    raw_answer = item.get('answer') or '[]'
+                    answers = json.loads(raw_answer)
                     if not isinstance(answers, list):
                         answers = [str(answers)]
                 except Exception:
-                    answers = [item['answer']]
+                    answers = [str(item.get('answer') or '')]
                     
                 # 1. Filtro contra cópias nominais (se a resposta estiver contida no prompt ou no sujeito)
                 has_copy_shortcut = False
