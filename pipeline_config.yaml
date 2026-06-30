@@ -27,6 +27,7 @@ pipelines:
     - country
     - place of birth
     seed: 100
+    purified: true
   freeman_stabilization:
     enabled: true
     target_classes:
@@ -47,6 +48,7 @@ pipelines:
     - place of birth
     layers_target: [12, 20, 21, 22, 23, 24, 25, 26]
     seed: 100
+    purified: true
 observability:
   logger: logfire
   log_level: INFO

@@ -66,6 +66,61 @@ class PopQASampler:
             sampled_data[c] = rng.sample(population, min(5, len(population)))
         return sampled_data
 
+    def sample_purified_representatives(self, active_classes: List[str], seed: int = 42, count_per_class: int = 5) -> Dict[str, List[Dict]]:
+        """
+        Extrai representantes aleatórios de cada classe semântica, mas purifica a amostragem
+        removendo atalhos nominais, vazamentos ortográficos (não-ASCII) e cópias diretas.
+        """
+        import json
+        rng = random.Random(seed)
+        sampled_data = {}
+        
+        for c in active_classes:
+            population = self.class_map[c]
+            purified_population = []
+            
+            for item in population:
+                question = item.get("question", "").lower()
+                subject = item.get("subject", "").lower()
+                
+                # Parse answers
+                try:
+                    answers = json.loads(item['answer'])
+                    if not isinstance(answers, list):
+                        answers = [str(answers)]
+                except Exception:
+                    answers = [item['answer']]
+                    
+                # 1. Filtro contra cópias nominais (se a resposta estiver contida no prompt ou no sujeito)
+                has_copy_shortcut = False
+                for ans in answers:
+                    ans_clean = ans.strip().lower()
+                    if ans_clean in question or ans_clean in subject:
+                        has_copy_shortcut = True
+                        break
+                if has_copy_shortcut:
+                    continue
+                    
+                # 2. Filtro contra vazamentos ortográficos (só aceita caracteres ASCII puros no sujeito e respostas)
+                # Isso remove nomes poloneses com "ę", finlandeses com "ä"/"ö", etc.
+                try:
+                    subject.encode('ascii')
+                    for ans in answers:
+                        ans.encode('ascii')
+                except UnicodeEncodeError:
+                    # Contém caracteres não-ASCII
+                    continue
+                    
+                purified_population.append(item)
+                
+            # Se a classe purificada ficou muito pequena, faz fallback para a população original
+            if len(purified_population) < count_per_class:
+                purified_population = population
+                
+            sampled_data[c] = rng.sample(purified_population, min(count_per_class, len(purified_population)))
+            
+        return sampled_data
+
     def generate_random_subsets_without_replacement(self) -> Generator[List[str], None, None]:
         """
         Gerador que sorteia subconjuntos de 5 classes sem reposição até esgotar o pool do benchmark.

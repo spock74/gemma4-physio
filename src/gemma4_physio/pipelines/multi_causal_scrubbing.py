@@ -78,7 +78,11 @@ def run_multi_causal_scrubbing(config_dict: dict, model, tokenizer, device: str)
     seed = config_dict.get("seed", 100)
     layer_indices = config_dict.get("layers_target", [12, 20, 21, 22, 23, 24, 25, 26])
     
-    data = sampler.sample_5x5_representatives(classes, seed=seed)
+    if config_dict.get("purified", False):
+        data = sampler.sample_purified_representatives(classes, seed=seed)
+        typer.secho("🔹 Amostragem Purificada Ativada (Removendo atalhos nominais/ortográficos).", fg=typer.colors.YELLOW)
+    else:
+        data = sampler.sample_5x5_representatives(classes, seed=seed)
     items = [item for c_items in data.values() for item in c_items]
     
     dtype = model.dtype
