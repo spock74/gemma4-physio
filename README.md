@@ -102,10 +102,10 @@ graph TD
     end
     
     subgraph "Core de Interpretabilidade (src/gemma4_physio/)"
-        Subspace & Scrub & MultiScrub & Freeman -. -->|Carrega Dados| Loader[data_loader.py]
-        Subspace & Scrub & MultiScrub & Freeman -. -->|Extrai Direções| Dirs[directions.py]
-        Scrub & MultiScrub & Freeman -. -->|Injeta Ganchos| Hooks[spps_hooks.py]
-        Freeman -. -->|Cálculos TDA| TDA[tda_engine.py]
+        Subspace & Scrub & MultiScrub & Freeman -.->|Carrega Dados| Loader[data_loader.py]
+        Subspace & Scrub & MultiScrub & Freeman -.->|Extrai Direções| Dirs[directions.py]
+        Scrub & MultiScrub & Freeman -.->|Injeta Ganchos| Hooks[spps_hooks.py]
+        Freeman -.->|Cálculos TDA| TDA[tda_engine.py]
     end
     
     Loader -->|Lê| PopQA[data/popqa/popqa_full.json]
