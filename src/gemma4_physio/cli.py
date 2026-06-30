@@ -107,6 +107,17 @@ def run_scrubbing_cmd():
     model, tokenizer, device = init_model()
     run_causal_scrubbing(cfg, model, tokenizer, device)
 
+@run_app.command("multi-scrubbing")
+def run_multi_scrubbing_cmd():
+    from gemma4_physio.pipelines.multi_causal_scrubbing import run_multi_causal_scrubbing
+    data = load_yaml()
+    cfg = data.get("pipelines", {}).get("multi_causal_scrubbing", {})
+    if not cfg.get("enabled", False):
+        typer.secho("Pipeline desabilitado no YAML.", fg=typer.colors.RED)
+        raise typer.Exit(1)
+    model, tokenizer, device = init_model()
+    run_multi_causal_scrubbing(cfg, model, tokenizer, device)
+
 @run_app.command("freeman")
 def run_freeman_cmd():
     from gemma4_physio.pipelines.freeman_stabilization import run_freeman_stabilization
@@ -123,16 +134,19 @@ def run_all_cmd():
     from gemma4_physio.pipelines.subspace_identity import run_subspace_identity
     from gemma4_physio.pipelines.causal_scrubbing import run_causal_scrubbing
     from gemma4_physio.pipelines.freeman_stabilization import run_freeman_stabilization
+    from gemma4_physio.pipelines.multi_causal_scrubbing import run_multi_causal_scrubbing
     
     data = load_yaml()
     cfg_identity = data.get("pipelines", {}).get("subspace_identity", {})
     cfg_scrubbing = data.get("pipelines", {}).get("causal_scrubbing", {})
     cfg_freeman = data.get("pipelines", {}).get("freeman_stabilization", {})
+    cfg_multi_scrubbing = data.get("pipelines", {}).get("multi_causal_scrubbing", {})
 
     pipelines_to_run = []
     if cfg_identity.get("enabled", False): pipelines_to_run.append(("Identidade de Subespaço", run_subspace_identity, cfg_identity))
     if cfg_scrubbing.get("enabled", False): pipelines_to_run.append(("Causal Scrubbing", run_causal_scrubbing, cfg_scrubbing))
     if cfg_freeman.get("enabled", False): pipelines_to_run.append(("Estabilização de Freeman", run_freeman_stabilization, cfg_freeman))
+    if cfg_multi_scrubbing.get("enabled", False): pipelines_to_run.append(("Causal Scrubbing Multicamada", run_multi_causal_scrubbing, cfg_multi_scrubbing))
 
     if not pipelines_to_run:
         typer.secho("Nenhum pipeline está habilitado no arquivo pipeline_config.yaml.", fg=typer.colors.RED)

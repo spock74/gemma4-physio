@@ -1,7 +1,7 @@
 import math
 import torch
 import torch.nn as nn
-from contextlib import contextmanager
+from contextlib import contextmanager, ExitStack
 
 @contextmanager
 def spps_rotational_hook(layer: nn.Module, v1: torch.Tensor, v2: torch.Tensor, theta: float, R: float):
@@ -74,3 +74,14 @@ def spps_ablation_hook(layer: nn.Module, v1: torch.Tensor, v2: torch.Tensor):
         yield
     finally:
         handle.remove()
+
+@contextmanager
+def spps_multi_ablation_hook(layers_with_dirs):
+    """
+    Context manager para registrar múltiplos ganchos de ablação (Causal Scrubbing) simultaneamente.
+    layers_with_dirs: Lista de tuplas (layer_module, v1, v2)
+    """
+    with ExitStack() as stack:
+        for layer, v1, v2 in layers_with_dirs:
+            stack.enter_context(spps_ablation_hook(layer, v1, v2))
+        yield

@@ -60,3 +60,43 @@ def test_tda_computation():
     assert isinstance(betti_0, int)
     assert isinstance(total_h1, float)
     assert betti_0 >= 1
+
+def test_multi_layer_scrubbing(tiny_model, dummy_tokenizer):
+    from gemma4_physio.spps_hooks import spps_multi_ablation_hook
+    from gemma4_physio.directions import extract_multi_difference_of_means
+    
+    d_model = tiny_model.d_model
+    v1 = torch.zeros(d_model)
+    v1[0] = 1.0
+    v2 = torch.zeros(d_model)
+    v2[1] = 1.0
+    
+    target_layers = [(0, tiny_model.model.layers[0]), (1, tiny_model.model.layers[1])]
+    
+    pos_prompts = ["The capital of France is", "The capital of Japan is"]
+    neg_prompts = ["The capital of Wakanda is", "The capital of Atlantis is"]
+    
+    v1_dict = extract_multi_difference_of_means(
+        tiny_model, 
+        dummy_tokenizer, 
+        pos_prompts, 
+        neg_prompts, 
+        target_layers, 
+        device="cpu"
+    )
+    
+    assert 0 in v1_dict
+    assert 1 in v1_dict
+    assert v1_dict[0].shape == (16,)
+    assert v1_dict[1].shape == (16,)
+    
+    layers_with_dirs = [
+        (tiny_model.model.layers[0], v1, v2),
+        (tiny_model.model.layers[1], v1, v2),
+    ]
+    prompt = "The capital of France is"
+    inputs = dummy_tokenizer(prompt)
+    
+    with spps_multi_ablation_hook(layers_with_dirs):
+        out = tiny_model.generate(inputs["input_ids"], max_new_tokens=1)
+        assert out is not None

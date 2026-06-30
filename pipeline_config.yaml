@@ -29,14 +29,24 @@ pipelines:
     seed: 100
   freeman_stabilization:
     enabled: true
-    layer_intervention: 12
-    layer_capture_start: 20
-    layer_capture_end: 26
+    target_classes:
+      - screenwriter
+      - producer
+      - author
+      - director
+      - composer
+    layer_target: 12
+    layers_repair: [20, 21, 22, 23, 24, 25, 26]
+    perturbation_magnitude: 15000.0
+    seed: 100
+  multi_causal_scrubbing:
+    enabled: true
     target_classes:
     - capital
     - country
     - place of birth
-    seed: 42
+    layers_target: [12, 20, 21, 22, 23, 24, 25, 26]
+    seed: 100
 observability:
   logger: logfire
   log_level: INFO
